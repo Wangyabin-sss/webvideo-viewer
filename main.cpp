@@ -123,10 +123,6 @@ string getdir_detail(string dirpath, int listnum, int width)
     return html;
 }
 
-void hi_callback(const httplib::Request& req, httplib::Response& res) {
-    res.set_content("Hello World!", "text/plain");
-}
-
 void video_callback(const httplib::Request& req, httplib::Response& res) {
     //auto numbers = req.matches[1];
     //cout<<req.path<<endl;
@@ -157,10 +153,7 @@ int main(int argc, char *argv[])
     }
 
     ser.set_base_dir(basedir);
-
-    ser.Get("/hi", hi_callback);
     ser.Get(R"(/video/(.*))", video_callback);
-    //ser.Get(R"(/video/(.*))", to_video_callback);
     ser.set_error_handler(error_callback);
 
     ser.listen("0.0.0.0", 8080);
