@@ -45,6 +45,7 @@ int check_file_type(char *filename)
         return 0;
 }
 
+//生成html中body里的内容
 string getdir_detail(string dirpath, int listnum, int width)
 {
     string html="";
@@ -124,10 +125,8 @@ string getdir_detail(string dirpath, int listnum, int width)
 }
 
 void video_callback(const httplib::Request& req, httplib::Response& res) {
-    //auto numbers = req.matches[1];
-    //cout<<req.path<<endl;
     string targetdir(basedir+req.path);
-    //在最后添加/
+    //在最后添加符号  /
     if(targetdir.substr(targetdir.length()-1)!="/")
         targetdir.append("/");
     string tmp = getdir_detail(targetdir, 3, 300);
@@ -153,6 +152,7 @@ int main(int argc, char *argv[])
     }
 
     ser.set_base_dir(basedir);
+    //允许video/的任意web路径进入回调函数处理
     ser.Get(R"(/video/(.*))", video_callback);
     ser.set_error_handler(error_callback);
 
