@@ -35,7 +35,7 @@ string htmltmp;
 
 string basedir="./www";
 
-int check_file_type(char *filename)
+int check_file_type(const char *filename)
 {
     if(strstr(filename, ".avi") != NULL)
         return 1;
@@ -92,14 +92,71 @@ string getdir_detail(string dirpath, int listnum, int width)
 
     vector<tuple<string,string>> files;
     from_txt_getname("./list.txt", files);
+    
+    int numtmp=0;
     for(size_t i=0;i<files.size();i++)
     {
-        cout<<get<0>(files[i])<<"--"<<get<1>(files[i])<<endl;
+        string type = get<0>(files[i]);
+        string name = get<1>(files[i]);
+        //cout<<get<0>(files[i])<<"--"<<get<1>(files[i])<<endl;
+        if(numtmp == 0)
+        {
+            html.append("<center>\r\n");
+        }
+        if(type == "<DIR>")
+        {
+            if(name == "..")
+            {
+                string tmp = dirpath;
+                if(tmp!="./www/video/")
+                {
+                    tmp.pop_back();
+                    while(tmp.substr(tmp.length()-1)!="/")
+                    {
+                        tmp.pop_back();
+                    }
+                    html.append("<a href=\""+tmp.substr(strlen("./www"))+"\"><img src=\"/dir.jpg\"");
+                    html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+                }
+                else
+                {
+                    html.append("<a><img src=\"/dir.jpg\"");
+                    html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+                }
+            }
+            else if(name == ".")
+            {
+                html.append("<a><img src=\"/ff.jpg\"");
+                html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+            }
+            else
+            {
+                html.append("<a href=\""+dirpath.substr(strlen("./www"))+name+"/"+"\"><img src=\"/dir.jpg\"");
+                html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+            }
+        }
+        else if(type == "<FILE>")
+        {
+            int ret=0;
+            if(ret = check_file_type(name.c_str())) {
+                html.append("<video controls width=\""+to_string(width)+"\"><source src=\""+dirpath.substr(strlen("./www"))+name+"\" type=\"");
+                if(ret == 1 || ret == 2)
+                    html.append("video/mp4\"></video>\r\n");
+                else if(ret == 3)
+                    html.append("video/ogg\"></video>\r\n");
+            }
+            else {
+                html.append("<span>"+name+"  文件格式不支持"+"</span>\r\n");
+            }
+        }
+        numtmp++;
+        if(numtmp==listnum) {
+            html.append("<center>\r\n");
+            numtmp = 0;
+        }
     }
-
-    int numtmp=0;
-    
-     
+    if(numtmp!=0)
+        html.append("<center>\r\n");
     //cout<<html<<endl;
     return html;
 }
