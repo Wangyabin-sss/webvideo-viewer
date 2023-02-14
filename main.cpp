@@ -120,7 +120,7 @@ void from_txt_getname(string listtxt, vector<tuple<string,string>> &tname)
 }
 
 //生成html中body里的内容
-string getdir_detail(string dirpath, int listnum, int width)
+string getdir_detail(string dirpath, int listnum)
 {
     string html="";
     string cmd("dir "+dirpath+" > ./list.txt");
@@ -190,14 +190,14 @@ string getdir_detail(string dirpath, int listnum, int width)
             int ret=0;
             if(ret = check_file_type(name.c_str())) {
                 html.append("<div class=\"video-item\">");
-                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/video/123.jpg);\" onclick=\"openVideo('"+dirpath.substr(strlen("./www"))+name+"')\"></div>");
+                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/video.jpg);\" onclick=\"openVideo('"+dirpath.substr(strlen("./www"))+name+"')\"></div>");
                 html.append("<div class=\"video-description\">");
                 html.append("<h3>"+dirpath.substr(strlen("./www"))+name+"</h3>");
                 html.append("<p>video file</p>\r\n</div>\r\n</div>");
             }
             else {
                 html.append("<div class=\"video-item\">");
-                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/video/123.jpg);\" onclick=\"openOther('"+dirpath.substr(strlen("./www"))+name+"')\"></div>");
+                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/unknown.jpg);\" onclick=\"openOther('"+dirpath.substr(strlen("./www"))+name+"')\"></div>");
                 html.append("<div class=\"video-description\">");
                 html.append("<h3>"+dirpath.substr(strlen("./www"))+name+"</h3>");
                 html.append("<p>not a video file</p>\r\n</div>\r\n</div>");
@@ -220,7 +220,8 @@ void video_callback(const httplib::Request& req, httplib::Response& res) {
     //在最后添加符号  /
     if(targetdir.substr(targetdir.length()-1)!="/")
         targetdir.append("/");
-    string tmp = getdir_detail(targetdir, 3, 300);
+    cout<<targetdir<<endl;
+    string tmp = getdir_detail(targetdir, 3);
     htmltmp = "";
     htmltmp.append(index_htmlstart+tmp+index_htmlend);
     res.set_content(htmltmp, "text/html");
