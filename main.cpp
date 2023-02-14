@@ -60,13 +60,13 @@ string index_htmlstart = R"(
 <body>)";
 string index_htmlend = R"(</body><script>
     function openVideo(videoUrl) {
-      window.open(videoUrl, '_blank');
+      window.open(videoUrl, '_self');
     }
     function openDir(videoUrl) {
       window.open(videoUrl, '_self');
     }
     function openOther(videoUrl) {
-      window.open(videoUrl, '_self');
+      window.open(videoUrl, '_blank');
     }
   </script></html>)";
 string htmltmp;
