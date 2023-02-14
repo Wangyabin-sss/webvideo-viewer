@@ -1,31 +1,44 @@
-<head>
-  <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet" />
+<html>
+  <head>
+    <script>
+      // Check if IntersectionObserver is supported
+      if ("IntersectionObserver" in window) {
+        // Define the observer
+        const observer = new IntersectionObserver((entries) => {
+          // Loop through each entry
+          entries.forEach((entry) => {
+            // If the entry is intersecting
+            if (entry.isIntersecting) {
+              // Load the video
+              const video = entry.target;
+              video.src = video.dataset.src;
+              video.play();
+              // Stop observing the video
+              observer.unobserve(video);
+            }
+          });
+        });
 
-  <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
-  <!-- <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script> -->
-</head>
+        // Get all videos with a data-src attribute
+        const videos = document.querySelectorAll("video[data-src]");
+        // Observe each video
+        videos.forEach((video) => {
+          observer.observe(video);
+        });
+      } else {
+        // Load all videos if IntersectionObserver is not supported
+        const videos = document.querySelectorAll("video");
+        videos.forEach((video) => {
+          video.src = video.dataset.src;
+          video.play();
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <video data-src="video1.mp4" controls></video>
+    <video data-src="video2.mp4" controls></video>
+    <video data-src="video3.mp4" controls></video>
+  </body>
+</html>
 
-<body>
-  <video
-    id="my-video"
-    class="video-js"
-    controls
-    preload="auto"
-    width="640"
-    height="264"
-    poster="..."
-    data-setup="{}"
-  >
-    <source src="video1.mp4" type="video/mp4" />
-    <!-- <source src="MY_VIDEO.webm" type="video/webm" /> -->
-    <p class="vjs-no-js">
-      To view this video please enable JavaScript, and consider upgrading to a
-      web browser that
-      <a href="https://videojs.com/html5-video-support/" target="_blank"
-        >supports HTML5 video</a
-      >
-    </p>
-  </video>
-
-  <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
-</body>

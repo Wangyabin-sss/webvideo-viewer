@@ -1,13 +1,15 @@
 #include <iostream>
-#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include <vector>
+//#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <httplib.h>
+#include <windows.h>
 #include <json.hpp>
 
 #ifdef __cplusplus
 extern "C"
 {
     #include <stdio.h>
-    #include <dirent.h>
+    #include <stdlib.h>
     #include <errno.h>
 }
 #endif
@@ -45,81 +47,59 @@ int check_file_type(char *filename)
         return 0;
 }
 
+void from_txt_getname(string listtxt, vector<tuple<string,string>> &tname)
+{
+    FILE *fd=NULL;
+    fd = fopen(listtxt.c_str(), "r");
+    if(fd == NULL) {
+      perror("打开文件时发生错误");
+      return;
+    }
+    char fbuff[512]={0};
+    while (fgets(fbuff, 512, fd) != NULL)
+    {
+        if(fbuff[0]!=' '&&fbuff[0]!='\n')
+        {
+            //cout<<fbuff;
+            strtok(fbuff," ");
+            strtok(NULL," ");
+            string type(strtok(NULL," "));
+            if(type=="<DIR>")
+            {
+                string name(strtok(NULL," "));
+                name.pop_back();
+                tname.push_back(make_tuple(type, name));
+            }
+            else
+            {
+                string name(strtok(NULL," "));
+                name.pop_back();
+                tname.push_back(make_tuple("<FILE>",name));
+            }
+        }
+    }
+    fclose(fd);
+}
+
 //生成html中body里的内容
 string getdir_detail(string dirpath, int listnum, int width)
 {
     string html="";
-    DIR *dir;
-    struct dirent *ptr;
-    int numtmp=0;    //用于显示几列数据
-    printf("try to open-%s\n",dirpath.c_str());
-    if ((dir=opendir(dirpath.c_str())) == NULL)
-    {    
-        perror("Open dir error...");
-        return html;
-    }
-    while ((ptr=readdir(dir)) != NULL)
+    string cmd("dir "+dirpath+" > ./list.txt");
+    replace(cmd.begin(), cmd.end(), '/', '\\');
+    //cout<<cmd.c_str()<<endl;
+    system(cmd.c_str());
+
+    vector<tuple<string,string>> files;
+    from_txt_getname("./list.txt", files);
+    for(size_t i=0;i<files.size();i++)
     {
-        if(numtmp == 0)
-        {
-            html.append("<center>\r\n");
-        }
-        if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0)    //current dir OR parrent dir
-        {
-            if(strcmp(ptr->d_name,"..")==0)
-            {
-                string tmp = dirpath;
-                if(tmp!="./www/video/")
-                {
-                    tmp.pop_back();
-                    while(tmp.substr(tmp.length()-1)!="/")
-                    {
-                        tmp.pop_back();
-                    }
-                    html.append("<a href=\""+tmp.substr(strlen("./www"))+"\"><img src=\"/dir.jpg\"");
-                    html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
-                }
-                else
-                {
-                    html.append("<a><img src=\"/dir.jpg\"");
-                    html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
-                }
-            }
-            else
-            {
-                html.append("<a><img src=\"/ff.jpg\"");
-                html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
-            }
-        }
-        else if(ptr->d_type == 8)    //file
-        {
-            int ret=0;
-            if(ret = check_file_type(ptr->d_name)) {
-                html.append("<video controls width=\""+to_string(width)+"\"><source src=\""+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"\" type=\"");
-                if(ret == 1 || ret == 2)
-                    html.append("video/mp4\"></video>\r\n");
-                else if(ret == 3)
-                    html.append("video/ogg\"></video>\r\n");
-            }
-            else {
-                html.append("<span>"+string(ptr->d_name)+"  文件格式不支持"+"</span>\r\n");
-            }
-        }
-        else if(ptr->d_type == 4)    //dir
-        {
-            html.append("<a href=\""+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"\"><img src=\"/dir.jpg\"");
-            html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
-        }
-        numtmp++;
-        if(numtmp==listnum) {
-            html.append("<center>\r\n");
-            numtmp = 0;
-        }
+        cout<<get<0>(files[i])<<"--"<<get<1>(files[i])<<endl;
     }
-    if(numtmp!=0)
-        html.append("<center>\r\n");
+
+    int numtmp=0;
     
-    closedir(dir);
+     
     //cout<<html<<endl;
     return html;
 }
