@@ -1,31 +1,62 @@
-<head>
-  <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet" />
-
-  <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
-  <!-- <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script> -->
-</head>
-
-<body>
-  <video
-    id="my-video"
-    class="video-js"
-    controls
-    preload="auto"
-    width="640"
-    height="264"
-    poster="..."
-    data-setup="{}"
-  >
-    <source src="video1.mp4" type="video/mp4" />
-    <!-- <source src="MY_VIDEO.webm" type="video/webm" /> -->
-    <p class="vjs-no-js">
-      To view this video please enable JavaScript, and consider upgrading to a
-      web browser that
-      <a href="https://videojs.com/html5-video-support/" target="_blank"
-        >supports HTML5 video</a
-      >
-    </p>
-  </video>
-
-  <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
-</body>
+<html>
+  <head>
+    <style>
+      .video-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .video-item {
+        width: 30%;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .video-thumbnail {
+        width: 100%;
+        height: 0;
+        padding-bottom: 75%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        cursor: pointer;
+        box-shadow: 0 0 20px #dda;
+      }
+      .video-description {
+        padding: 10px;
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="video-container">
+      <div class="video-item">
+        <div class="video-thumbnail" style="background-image: url(123.jpg);" onclick="openVideo('/video/ss')"></div>
+        <div class="video-description">
+          <h3>Video 1 Title</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer maximus nisi at libero aliquet, non semper libero aliquam. Nam auctor ipsum nec dolor molestie bibendum.</p>
+        </div>
+      </div>
+      <div class="video-item">
+        <div class="video-thumbnail" style="background-image: url(video2.jpg);" onclick="openVideo('./video.html')"></div>
+        <div class="video-description">
+          <h3>Video 2 Title</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer maximus nisi at libero aliquet, non semper libero aliquam. Nam auctor ipsum nec dolor molestie bibendum.</p>
+        </div>
+      </div>
+      <div class="video-item">
+        <div class="video-thumbnail" style="background-image: url(../dir.jpg);" onclick="openVideo('./test/txt.txt')"></div>
+        <div class="video-description">
+          <h3>Video 2 Title</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer maximus nisi at libero aliquet, non semper libero aliquam. Nam auctor ipsum nec dolor molestie bibendum.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    function openVideo(videoUrl) {
+      window.open(videoUrl, '_blank');
+    }
+  </script>
+</html>
