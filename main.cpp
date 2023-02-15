@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <sstream>
 //#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <httplib.h>
 #include <windows.h>
@@ -60,6 +61,7 @@ string index_htmlstart = R"(
 <body>)";
 string index_htmlend = R"(</body><script>
     function openVideo(videoUrl) {
+        
       window.open(videoUrl, '_self');
     }
     function openDir(videoUrl) {
@@ -85,7 +87,7 @@ int check_file_type(const char *filename)
         return 0;
 }
 
-void from_txt_getname(string listtxt, vector<tuple<string,string>> &tname)
+void txt_get_dir_files(string listtxt, vector<tuple<string,string>> &tname)
 {
     FILE *fd=NULL;
     fd = fopen(listtxt.c_str(), "r");
@@ -119,24 +121,118 @@ void from_txt_getname(string listtxt, vector<tuple<string,string>> &tname)
     fclose(fd);
 }
 
+
+// UTF-8转GB2312
+std::string UTF8ToGB2312Ex(const char *utf8)
+{
+	if (!utf8 || strlen(utf8) < 1)
+		return "";
+ 
+	std::stringstream ss;
+	int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+	wchar_t *wstr = new wchar_t[len + 1];
+	memset(wstr, 0, len + 1);
+	MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wstr, len);
+	len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+	char *str = new char[len + 1];
+	memset(str, 0, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
+	ss << str;
+	delete []wstr;
+	delete []str;
+	return ss.str();
+}
+
+// GB2312转UTF-8
+std::string GB2312ToUTF8Ex(const char *gb2312)
+{
+	if (!gb2312 || strlen(gb2312) < 1)
+		return "";
+ 
+	std::stringstream ss;
+	int len = MultiByteToWideChar(CP_ACP, 0, gb2312, -1, NULL, 0);
+	wchar_t *wstr = new wchar_t[len + 1];
+	memset(wstr, 0, len + 1);
+	MultiByteToWideChar(CP_ACP, 0, gb2312, -1, wstr, len);
+	len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+	char *str = new char[len + 1];
+	memset(str, 0, len + 1);
+	WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
+	ss << str;
+	delete []wstr;
+	delete []str;
+	return ss.str();
+}
+
+int win32_get_dir_files(string path, vector<tuple<string,string>> &tname)
+{
+    HANDLE hFind;
+    WIN32_FIND_DATA FindFileData;
+
+    path.append("*.*");
+
+    path = UTF8ToGB2312Ex(path.c_str());
+
+    // 查找第一个文件
+    hFind = FindFirstFile(path.c_str(), &FindFileData);
+
+    if (hFind == INVALID_HANDLE_VALUE)
+    {
+        printf("Error when list %s\n", path.c_str());
+        return -1;
+    }
+    while (FindNextFile(hFind, &FindFileData) != FALSE)
+    {
+        //判断是文件夹还是文件
+        if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            string name = GB2312ToUTF8Ex(FindFileData.cFileName);
+            //string name(FindFileData.cFileName);
+            tname.push_back(make_tuple("<DIR>", name));
+        }
+        else
+        {
+            string name = GB2312ToUTF8Ex(FindFileData.cFileName);
+            //string name(FindFileData.cFileName);
+            tname.push_back(make_tuple("<FILE>", name));
+        }
+    }
+
+    // ERROR_NO_MORE_FILES 表示已经全部查找完成
+    if (GetLastError() != ERROR_NO_MORE_FILES)
+    {
+        printf("Error when get next file in %s\n", path.c_str());
+        // 关闭句柄
+        FindClose(hFind);
+        return -2;
+    }
+    else
+    {
+        // 关闭句柄
+        FindClose(hFind);
+        return 0;
+    }
+}
+
 //生成html中body里的内容
 string getdir_detail(string dirpath, int listnum)
 {
     string html="";
-    string cmd("dir "+dirpath+" > ./list.txt");
-    replace(cmd.begin(), cmd.end(), '/', '\\');
-    //cout<<cmd.c_str()<<endl;
-    system(cmd.c_str());
+
+    // string cmd("dir "+dirpath+" > ./list.txt");
+    // replace(cmd.begin(), cmd.end(), '/', '\\');
+    // cout<<cmd.c_str()<<endl;
+    // system(cmd.c_str());
 
     vector<tuple<string,string>> files;
-    from_txt_getname("./list.txt", files);
+    win32_get_dir_files(dirpath, files);
     
     int numtmp=0;
     for(size_t i=0;i<files.size();i++)
     {
         string type = get<0>(files[i]);
         string name = get<1>(files[i]);
-        //cout<<get<0>(files[i])<<"--"<<get<1>(files[i])<<endl;
+        cout<<get<0>(files[i])<<"--"<<get<1>(files[i])<<endl;
         if(numtmp == 0)
         {
             html.append("<div class=\"video-container\">\r\n");
