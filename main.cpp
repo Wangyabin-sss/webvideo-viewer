@@ -26,9 +26,48 @@ string index_htmlstart = R"(
 <head>
 <title>video browser</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style>
+      .video-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .video-item {
+        width: 30%;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .video-thumbnail {
+        width: 100%;
+        height: 0;
+        padding-bottom: 75%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        cursor: pointer;
+        box-shadow: 0 0 20px #dda;
+      }
+      .video-description {
+        padding: 10px;
+        background-color: #f2f2f2;
+      }
+    </style>
 </head>    
 <body>)";
-string index_htmlend = R"(</body></html>)";
+string index_htmlend = R"(</body><script>
+    function openVideo(videoUrl) {
+        
+      window.open(videoUrl, '_self');
+    }
+    function openDir(videoUrl) {
+      window.open(videoUrl, '_self');
+    }
+    function openOther(videoUrl) {
+      window.open(videoUrl, '_blank');
+    }
+  </script></html>)";
 string htmltmp;
 
 string basedir="./www";
@@ -76,39 +115,55 @@ string getdir_detail(string dirpath, int listnum, int width)
                     {
                         tmp.pop_back();
                     }
-                    html.append("<a href=\""+tmp.substr(strlen("./www"))+"\"><img src=\"/dir.jpg\"");
-                    html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+                    html.append("<div class=\"video-item\">");
+                    html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/dir.jpg);\" onclick=\"openDir('"+tmp.substr(strlen("./www"))+"')\"></div>");
+                    html.append("<div class=\"video-description\">");
+                    html.append("<h3>Video 1 Title</h3>");
+                    html.append("<p>上一级目录"+tmp.substr(strlen("./www"))+"</p>\r\n</div>\r\n</div>");
                 }
                 else
                 {
-                    html.append("<a><img src=\"/dir.jpg\"");
-                    html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+                    html.append("<div class=\"video-item\">");
+                    html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/dir.jpg);\"></div>");
+                    html.append("<div class=\"video-description\">");
+                    html.append("<h3>Video 1 Title</h3>");
+                    html.append("<p>/</p>\r\n</div>\r\n</div>");
                 }
             }
             else
             {
-                html.append("<a><img src=\"/ff.jpg\"");
-                html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+                html.append("<div class=\"video-item\">");
+                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/ff.jpg);\"></div>");
+                html.append("<div class=\"video-description\">");
+                html.append("<h3>Video 1 Title</h3>");
+                html.append("<p>刷新</p>\r\n</div>\r\n</div>");
             }
         }
         else if(ptr->d_type == 8)    //file
         {
             int ret=0;
             if(ret = check_file_type(ptr->d_name)) {
-                html.append("<video controls width=\""+to_string(width)+"\"><source src=\""+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"\" type=\"");
-                if(ret == 1 || ret == 2)
-                    html.append("video/mp4\"></video>\r\n");
-                else if(ret == 3)
-                    html.append("video/ogg\"></video>\r\n");
+                html.append("<div class=\"video-item\">");
+                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/video.jpg);\" onclick=\"openVideo('"+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"')\"></div>");
+                html.append("<div class=\"video-description\">");
+                html.append("<h3>"+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"</h3>");
+                html.append("<p>video file</p>\r\n</div>\r\n</div>");
             }
             else {
-                html.append("<span>"+string(ptr->d_name)+"  文件格式不支持"+"</span>\r\n");
+                html.append("<div class=\"video-item\">");
+                html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/unknown.jpg);\" onclick=\"openOther('"+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"')\"></div>");
+                html.append("<div class=\"video-description\">");
+                html.append("<h3>"+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"</h3>");
+                html.append("<p>not a video file</p>\r\n</div>\r\n</div>");
             }
         }
         else if(ptr->d_type == 4)    //dir
         {
-            html.append("<a href=\""+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"\"><img src=\"/dir.jpg\"");
-            html.append(" width=\""+to_string(width)+"px\"></a>\r\n");
+            html.append("<div class=\"video-item\">");
+            html.append("<div class=\"video-thumbnail\" style=\"background-image: url(/dir.jpg);\" onclick=\"openDir('"+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"/')\"></div>");
+            html.append("<div class=\"video-description\">");
+            html.append("<h3>Video 1 Title</h3>");
+            html.append("<p>下一级目录"+dirpath.substr(strlen("./www"))+string(ptr->d_name)+"/</p>\r\n</div>\r\n</div>");
         }
         numtmp++;
         if(numtmp==listnum) {
