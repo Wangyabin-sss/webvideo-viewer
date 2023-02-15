@@ -101,7 +101,7 @@ string getdir_detail(string dirpath, int listnum, int width)
     {
         if(numtmp == 0)
         {
-            html.append("<center>\r\n");
+            html.append("<div class=\"video-container\">\r\n");
         }
         if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0)    //current dir OR parrent dir
         {
@@ -167,12 +167,12 @@ string getdir_detail(string dirpath, int listnum, int width)
         }
         numtmp++;
         if(numtmp==listnum) {
-            html.append("<center>\r\n");
+            html.append("</div>\r\n");
             numtmp = 0;
         }
     }
     if(numtmp!=0)
-        html.append("<center>\r\n");
+        html.append("</div>\r\n");
     
     closedir(dir);
     //cout<<html<<endl;
