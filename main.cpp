@@ -58,7 +58,7 @@ string index_htmlstart = R"(
 </head>    
 <body>)";
 string index_htmlend = R"(</body><script>
-    function openVideo(video) {
+    function openVideo(videoUrl) {
         window.open(videoUrl, '_self');
     }
     function openDir(videoUrl) {
