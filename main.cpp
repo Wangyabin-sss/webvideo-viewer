@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 //#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <httplib.h>
 #include <json.hpp>
@@ -57,9 +58,8 @@ string index_htmlstart = R"(
 </head>    
 <body>)";
 string index_htmlend = R"(</body><script>
-    function openVideo(videoUrl) {
-        
-      window.open(videoUrl, '_self');
+    function openVideo(video) {
+        window.open(videoUrl, '_self');
     }
     function openDir(videoUrl) {
       window.open(videoUrl, '_self');
@@ -172,7 +172,32 @@ string getdir_detail(string dirpath, int listnum, int width)
         }
     }
     if(numtmp!=0)
+    {
+        html.append("<div class=\"video-item\">");
+        html.append("<form method=\"POST\" action=\"/makedir\" accept-charset=\"utf-8\">");
+		html.append("<input type=\"text\" id=\"text-input\" name=\"text-input\" placeholder=\"在这里输入要提交的文本\">"); 
+        html.append("<input type=\"hidden\" name=\"path-name\" value=\""+dirpath+"\">");
+        html.append("<button type=\"submit\">提交</button> </form>");
+        html.append("<form method=\"POST\" action=\"/fileupload"+dirpath.substr(1)+"\" enctype=\"multipart/form-data\">");
+        html.append("<div><label for=\"file\">Choose file to upload</label>");
+        html.append("<input type=\"file\" id=\"file\" name=\"file\" multiple /></div>");
+        html.append("<div><button>Submit</button></div></form></div>");
         html.append("</div>\r\n");
+    }
+    else
+    {
+        html.append("<div class=\"video-container\">\r\n");
+        html.append("<div class=\"video-item\">");
+        html.append("<form method=\"POST\" action=\"/makedir\" accept-charset=\"utf-8\">");
+		html.append("<input type=\"text\" id=\"text-input\" name=\"text-input\" placeholder=\"在这里输入要提交的文本\">");
+        html.append("<input type=\"hidden\" name=\"path-name\" value=\""+dirpath+"\">"); 
+        html.append("<button type=\"submit\">提交</button> </form>");
+        html.append("<form method=\"POST\" action=\"/fileupload"+dirpath.substr(1)+"\" enctype=\"multipart/form-data\">");
+        html.append("<div><label for=\"file\">Choose file to upload</label>");
+        html.append("<input type=\"file\" id=\"file\" name=\"file\" multiple /></div>");
+        html.append("<div><button>Submit</button></div></form></div>");
+        html.append("</div>\r\n");
+    }
     
     closedir(dir);
     //cout<<html<<endl;
@@ -188,6 +213,30 @@ void video_callback(const httplib::Request& req, httplib::Response& res) {
     htmltmp = "";
     htmltmp.append(index_htmlstart+tmp+index_htmlend);
     res.set_content(htmltmp, "text/html");
+}
+
+void file_upload(const httplib::Request& req, httplib::Response& res) {
+    auto file = req.get_file_value("file");
+    string filenamepath("."+req.path.substr(strlen("/fileupload"))+file.filename);
+
+    cout<< "file length: " << file.content.length() << endl
+        << "file name: " << filenamepath << endl;
+
+    ofstream ofs(filenamepath, std::ios::binary);
+    ofs << file.content;
+
+    res.set_redirect(req.path.substr(strlen("/fileupload/www")), 302);
+    res.set_content("", "text/html");
+}
+void make_dir(const httplib::Request& req, httplib::Response& res) {
+    string gettext = req.get_param_value("text-input");
+    string path = req.get_param_value("path-name");
+
+    string cmd("mkdir "+path+gettext);
+    system(cmd.c_str());
+
+    res.set_redirect(path.substr(strlen("./www")), 302);
+    res.set_content("", "text/html");
 }
 
 void error_callback(const httplib::Request& req, httplib::Response& res) {
@@ -208,7 +257,9 @@ int main(int argc, char *argv[])
 
     ser.set_base_dir(basedir);
     //允许video/的任意web路径进入回调函数处理
-    ser.Get(R"(/video/(.*))", video_callback);
+    ser.Get("/video/(.*)", video_callback);
+    ser.Post("/fileupload/(.*)", file_upload);
+    ser.Post("/makedir", make_dir);
     ser.set_error_handler(error_callback);
 
     ser.listen("0.0.0.0", 8080);

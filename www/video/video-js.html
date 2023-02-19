@@ -32,11 +32,19 @@
   <body>
     <div class="video-container">
       <div class="video-item">
-        <div class="video-thumbnail" style="background-image: url(123.jpg);" onclick="openVideo('/video/ss')"></div>
-        <div class="video-description">
-          <h3>Video 1 Title</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer maximus nisi at libero aliquet, non semper libero aliquam. Nam auctor ipsum nec dolor molestie bibendum.</p>
-        </div>
+        <form method="GET" action="/text">
+          <input type="text" id="text-input" name="text-input" placeholder="在这里输入要提交的文本">
+          <button type="submit">提交</button>
+        </form>
+        <form method="post" action="/post" enctype="multipart/form-data">
+          <div>
+            <label for="file">Choose file to upload</label>
+            <input type="file" id="file" name="file" multiple />
+          </div>
+          <div>
+            <button>Submit</button>
+          </div>
+        </form>
       </div>
       <div class="video-item">
         <div class="video-thumbnail" style="background-image: url(video2.jpg);" onclick="openVideo('./video.html')"></div>

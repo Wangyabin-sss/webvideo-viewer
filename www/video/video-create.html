@@ -1,35 +1,56 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      .video-container {
-        display: flex;
-        flex-wrap: wrap;
-      }
+<head>
+	<title>Long Press Example</title>
+	<style type="text/css">
+		#longPressMenu {
+			display: none;
+			position: absolute;
+			background-color: #f1f1f1;
+			border: 1px solid #ccc;
+			padding: 10px;
+			box-shadow: 0 0 10px #aaa;
+			z-index: 1;
+		}
+	</style>
+</head>
+<body>
+	<h1>Long Press Example</h1>
+	<p>Long press on the button below to see the options:</p>
+	<button onmousedown="startTimer()" onmouseup="endTimer()">Long Press Me</button>
+	<div id="longPressMenu">
+		<button onclick="createNewFolder()">New Folder</button>
+		<button onclick="uploadFile()">Upload File</button>
+	</div>
 
-      .video {
-        width: 33.33%;
-        padding: 10px;
-        box-sizing: border-box;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="video-container">
-      <div class="video">
-        <video controls>
-          <source src="video1.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="video">
-        <video controls>
-          <source src="video2.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="video">
-        <video controls>
-          <source src="video3.mp4" type="video/mp4">
-        </video>
-      </div>
-    </div>
-  </body>
+	<script type="text/javascript">
+		var pressTimer;
+		var longPressMenu = document.getElementById("longPressMenu");
+		var longPressButton = document.querySelector("button");
+
+		function startTimer() {
+			pressTimer = window.setTimeout(showMenu, 1000);
+		}
+
+		function endTimer() {
+			window.clearTimeout(pressTimer);
+		}
+
+		function showMenu() {
+			longPressMenu.style.display = "block";
+			longPressMenu.style.top = longPressButton.offsetTop + longPressButton.offsetHeight + "px";
+			longPressMenu.style.left = longPressButton.offsetLeft + "px";
+		}
+
+		function createNewFolder() {
+			// TODO: Implement folder creation logic
+			alert("Create new folder option selected");
+		}
+
+		function uploadFile() {
+			// TODO: Implement file upload logic
+			alert("Upload file option selected");
+		}
+	</script>
+</body>
 </html>
